@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzaria Delícia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-pizza-slice"></i>
+            <h1>Pizzaria Delícia</h1>
+        </div>
+        <div class="cart-icon">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count">0</span>
+        </div>
+    </nav>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <h2>Cardápio</h2>
+            <ul>
+                <li><a href="#"><i class="fas fa-pizza-slice"></i> Pizzas</a></li>
+                <li><a href="#"><i class="fas fa-bread-slice"></i> Massas</a></li>
+                <li><a href="#"><i class="fas fa-glass-whiskey"></i> Bebidas</a></li>
+                <li><a href="#"><i class="fas fa-ice-cream"></i> Sobremesas</a></li>
+                <li><a href="#"><i class="fas fa-percent"></i> Promoções</a></li>
+            </ul>
+        </aside>
+
+        <main class="container">
+            <section class="sessao">
+                <h2>Pizzas Tradicionais</h2>
+                <div class="produtos">
+         
+                </div>
+            </section>
+
+            <section class="sessao">
+                <h2>Pizzas Especiais</h2>
+                <div class="produtos">
+                
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <aside class="carrinho-sidebar">
+        <div class="carrinho-header">
+            <h2>Seu Pedido</h2>
+            <button class="close-cart"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="carrinho-items">
+            <div class="empty-cart">
+                <i class="fas fa-shopping-basket"></i>
+                <p>Seu carrinho está vazio</p>
+            </div>
+            
+        </div>
+        <div class="carrinho-footer">
+            <div class="total">
+                <span>Total:</span>
+                <span>R$ 0.00</span>
+            </div>
+            <button class="checkout-btn">Finalizar Pedido</button>
+        </div>
+    </aside>
+
+    <script src="script.js"></script>
+</body>
+</html>
