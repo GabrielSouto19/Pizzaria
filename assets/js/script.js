@@ -81,3 +81,9 @@ const closeCartBtn = document.querySelector('.close-cart');
 const totalElement = document.querySelector('.total span:last-child');
 const checkoutBtn = document.querySelector('.checkout-btn');
 const emptyCartMsg = document.querySelector('.empty-cart');
+
+
+async function carregarPizzas() {
+    
+    
+}
