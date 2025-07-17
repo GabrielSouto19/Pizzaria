@@ -3,10 +3,829 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizzaria Delícia</title>
+    <title>Pizzaria Delícia - Gestão de Comandas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/styles.css">
-    
+    <style>
+        :root {
+            --primary-color: #c62828; /* Vermelho pizzaria */
+            --secondary-color: #fbc02d; /* Amarelo queijo */
+            --accent-color: #388e3c; /* Verde manjericão */
+            --background-color: #fff3e0; /* Bege claro */
+            --text-color: #5d4037; /* Marrom escuro */
+            --card-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --mesa-ocupada: #ffcdd2;
+            --mesa-livre: #c8e6c9;
+            --mesa-reservada: #bbdefb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .logo i {
+            color: var(--secondary-color);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background-color: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 1rem;
+            min-height: 100%;
+            position: sticky;
+            top: 70px;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            transition: all 0.2s;
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: var(--secondary-color);
+            transform: translateX(5px);
+        }
+
+        .sidebar i {
+            width: 25px;
+            text-align: center;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        /* Abas do sistema */
+        .abas {
+            display: flex;
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .aba {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-right: 0.5rem;
+            border-radius: 5px 5px 0 0;
+            font-weight: 500;
+        }
+
+        .aba.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .conteudo-aba {
+            display: none;
+        }
+
+        .conteudo-aba.active {
+            display: block;
+        }
+
+        /* Estilo para a aba de Mesas */
+        .mesas-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .mesa {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mesa:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .mesa.livre {
+            background-color: var(--mesa-livre);
+        }
+
+        .mesa.ocupada {
+            background-color: var(--mesa-ocupada);
+        }
+
+        .mesa.reservada {
+            background-color: var(--mesa-reservada);
+        }
+
+        .mesa-numero {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .mesa-status {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .mesa-info {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mesa-cliente {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .mesa-tempo {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .mesa-acoes {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .mesa-btn {
+            padding: 0.3rem 0.6rem;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .mesa-btn.primary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        .mesa-btn.danger {
+            background-color: #e53935;
+            color: white;
+        }
+
+        .mesa-btn.success {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Estilo para a aba de Cardápio */
+        .sessao {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-top: 5px solid var(--primary-color);
+        }
+
+        .sessao h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px dashed var(--secondary-color);
+        }
+
+        .produtos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 1rem 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .card .description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            min-height: 40px;
+        }
+
+        .card .price {
+            color: var(--accent-color);
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .card button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .card button:hover {
+            background-color: #ffa000;
+        }
+
+        .tamanhos {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tamanho-btn {
+            flex: 1;
+            padding: 0.3rem;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tamanho-btn.active {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        /* Estilo para a aba de Comandas */
+        .comandas-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .comanda {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .comanda-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comanda-title {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+
+        .comanda-mesa {
+            font-weight: bold;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .comanda-cliente {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .comanda-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .comanda-status.aberta {
+            background-color: #ffecb3;
+            color: #ffa000;
+        }
+
+        .comanda-status.fechada {
+            background-color: #c8e6c9;
+            color: var(--accent-color);
+        }
+
+        .comanda-items {
+            margin-bottom: 1.5rem;
+        }
+
+        .comanda-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .comanda-item-nome {
+            flex: 1;
+        }
+
+        .comanda-item-quantidade {
+            width: 30px;
+            text-align: center;
+        }
+
+        .comanda-item-preco {
+            width: 80px;
+            text-align: right;
+        }
+
+        .comanda-total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--secondary-color);
+        }
+
+        .comanda-acoes {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+
+        .comanda-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .comanda-btn.primary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        .comanda-btn.success {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .comanda-btn.danger {
+            background-color: #e53935;
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Carrinho Sidebar */
+        .carrinho-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 15px rgba(0,0,0,0.2);
+            transition: right 0.3s ease;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+        }
+
+        .carrinho-sidebar.active {
+            right: 0;
+        }
+
+        .carrinho-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 2px dashed var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .carrinho-header h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .close-cart {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: transform 0.3s;
+        }
+
+        .close-cart:hover {
+            transform: rotate(90deg);
+            color: var(--accent-color);
+        }
+
+        .carrinho-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .carrinho-item {
+            display: flex;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .carrinho-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 1rem;
+        }
+
+        .carrinho-item-info {
+            flex: 1;
+        }
+
+        .carrinho-item-info h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.3rem;
+        }
+
+        .carrinho-item-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .carrinho-item-info .preco {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .carrinho-item-controle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .carrinho-item-controle button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carrinho-item-controle button:hover {
+            background: #b71c1c;
+        }
+
+        .carrinho-item-controle span {
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .remover-item {
+            color: #f44336;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: inline-block;
+        }
+
+        .remover-item:hover {
+            text-decoration: underline;
+        }
+
+        .carrinho-footer {
+            padding-top: 1rem;
+            border-top: 2px dashed var(--secondary-color);
+        }
+
+        .total {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .total span:last-child {
+            color: var(--accent-color);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .checkout-btn:hover {
+            background-color: #2e7d32;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .empty-cart i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 1200px) {
+            .mesas-container, .comandas-container {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            .layout {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                min-height: auto;
+                position: static;
+                padding: 1rem;
+            }
+            .sidebar ul {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+                justify-content: center;
+            }
+            .sidebar li {
+                margin-bottom: 0;
+            }
+            .sidebar a:hover {
+                transform: none;
+            }
+            .container {
+                padding: 0 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .produtos {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            .carrinho-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+            .navbar {
+                padding: 1rem;
+            }
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+            .nav-buttons {
+                gap: 0.5rem;
+            }
+            .nav-btn span {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .abas {
+                flex-wrap: wrap;
+            }
+            .aba {
+                flex: 1;
+                text-align: center;
+                margin-bottom: 0.5rem;
+            }
+            .mesas-container, .comandas-container {
+                grid-template-columns: 1fr;
+            }
+            .comanda-acoes {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .comanda-btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -14,41 +833,101 @@
             <i class="fas fa-pizza-slice"></i>
             <h1>Pizzaria Delícia</h1>
         </div>
-        <div class="cart-icon">
-            <i class="fas fa-shopping-cart"></i>
-            <span class="cart-count">0</span>
+        <div class="nav-buttons">
+            <button class="nav-btn" id="nova-comanda">
+                <i class="fas fa-plus"></i>
+                <span>Nova Comanda</span>
+            </button>
+            <button class="nav-btn" id="open-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Carrinho</span>
+                <span class="cart-count">0</span>
+            </button>
         </div>
     </nav>
 
     <div class="layout">
         <aside class="sidebar">
-            <h2>Cardápio</h2>
+            <h2>Gestão de Comandas</h2>
             <ul>
-                <li><a href="#"><i class="fas fa-pizza-slice"></i> Pizzas</a></li>
-                <li><a href="#"><i class="fas fa-bread-slice"></i> Massas</a></li>
-                <li><a href="#"><i class="fas fa-glass-whiskey"></i> Bebidas</a></li>
-                <li><a href="#"><i class="fas fa-ice-cream"></i> Sobremesas</a></li>
-                <li><a href="#"><i class="fas fa-percent"></i> Promoções</a></li>
+                <li><a href="#" class="aba-link" data-aba="mesas"><i class="fas fa-utensils"></i> Mesas</a></li>
+                <li><a href="#" class="aba-link" data-aba="comandas"><i class="fas fa-clipboard-list"></i> Comandas</a></li>
+                <li><a href="#" class="aba-link" data-aba="cardapio"><i class="fas fa-book"></i> Cardápio</a></li>
+                <li><a href="#"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> Configurações</a></li>
             </ul>
         </aside>
 
         <main class="container">
-            <section class="sessao">
-                <h2>Pizzas Tradicionais</h2>
-                <div class="produtos">
-         
-                </div>
-            </section>
+            <div class="abas">
+                <div class="aba active" data-aba="mesas">Mesas</div>
+                <div class="aba" data-aba="comandas">Comandas</div>
+                <div class="aba" data-aba="cardapio">Cardápio</div>
+            </div>
 
-            <section class="sessao">
-                <h2>Pizzas Especiais</h2>
-                <div class="produtos">
-                
+            <div class="conteudo-aba active" id="mesas">
+                <div class="mesas-container">
+                    <!-- Mesas serão inseridas aqui via JavaScript -->
                 </div>
-            </section>
+            </div>
+
+            <div class="conteudo-aba" id="comandas">
+                <div class="comandas-container">
+                    <!-- Comandas serão inseridas aqui via JavaScript -->
+                </div>
+            </div>
+
+            <div class="conteudo-aba" id="cardapio">
+                <section class="sessao">
+                    <h2>Pizzas Tradicionais</h2>
+                    <div class="produtos" id="tradicionais">
+                        <!-- Pizzas tradicionais serão inseridas aqui via JavaScript -->
+                    </div>
+                </section>
+
+                <section class="sessao">
+                    <h2>Pizzas Especiais</h2>
+                    <div class="produtos" id="especiais">
+                        <!-- Pizzas especiais serão inseridas aqui via JavaScript -->
+                    </div>
+                </section>
+            </div>
         </main>
     </div>
     
+    <!-- Modal para Nova Comanda/Mesa -->
+    <div class="modal" id="comanda-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 class="modal-title" id="modal-title">Nova Comanda</h2>
+            <form id="comanda-form">
+                <div class="form-group">
+                    <label for="mesa-numero">Número da Mesa</label>
+                    <select id="mesa-numero" required>
+                        <!-- Opções serão preenchidas via JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cliente-nome">Nome do Cliente</label>
+                    <input type="text" id="cliente-nome" placeholder="Digite o nome do cliente" required>
+                </div>
+                <div class="form-group">
+                    <label for="cliente-tel">Telefone (Opcional)</label>
+                    <input type="tel" id="cliente-tel" placeholder="(00) 00000-0000">
+                </div>
+                <div class="form-group">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" rows="3" placeholder="Alguma observação importante?"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="comanda-btn danger" id="cancelar-comanda">Cancelar</button>
+                    <button type="submit" class="comanda-btn success" id="salvar-comanda">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Carrinho Sidebar -->
     <aside class="carrinho-sidebar">
         <div class="carrinho-header">
             <h2>Seu Pedido</h2>
@@ -59,17 +938,17 @@
                 <i class="fas fa-shopping-basket"></i>
                 <p>Seu carrinho está vazio</p>
             </div>
-            
+            <!-- Itens do carrinho serão inseridos aqui via JavaScript -->
         </div>
         <div class="carrinho-footer">
             <div class="total">
                 <span>Total:</span>
                 <span>R$ 0.00</span>
             </div>
-            <button class="checkout-btn">Finalizar Pedido</button>
+            <button class="checkout-btn">Adicionar à Comanda</button>
         </div>
     </aside>
 
-    <script src="assets/js/script.js"></script>
+   <script src="assets/js/script.js"></script>
 </body>
 </html>
